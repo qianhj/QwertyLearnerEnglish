@@ -36,6 +36,13 @@
           >
             ⭐ 仅高频
           </button>
+          <button
+            class="sort-btn"
+            @click="sortOrder = sortOrder === 'default' ? 'asc' : sortOrder === 'asc' ? 'desc' : 'default'"
+            :title="sortOrder === 'default' ? '点击按 A-Z 排序' : sortOrder === 'asc' ? '点击按 Z-A 排序' : '点击恢复默认排序'"
+          >
+            {{ sortOrder === 'default' ? '排序' : sortOrder === 'asc' ? 'A-Z ↑' : 'Z-A ↓' }}
+          </button>
         </div>
       </header>
 
@@ -87,15 +94,25 @@ const selectedCategory = ref('全部')
 const searchQuery = ref('')
 const showStarOnly = ref(false)
 const selectedWord = ref(null)
+const sortOrder = ref('default') // 'default' | 'asc' | 'desc'
 
 const filteredWords = computed(() => {
   const q = searchQuery.value.toLowerCase().trim()
-  return allWords.filter(w => {
+  let result = allWords.filter(w => {
     if (selectedCategory.value !== '全部' && w.category !== selectedCategory.value) return false
     if (showStarOnly.value && !w.isHighFreq) return false
     if (q && !w.word.toLowerCase().includes(q) && !w.meaning.includes(q)) return false
     return true
   })
+
+  // A-Z 排序
+  if (sortOrder.value === 'asc') {
+    result = result.slice().sort((a, b) => a.word.localeCompare(b.word, 'en'))
+  } else if (sortOrder.value === 'desc') {
+    result = result.slice().sort((a, b) => b.word.localeCompare(a.word, 'en'))
+  }
+
+  return result
 })
 </script>
 
@@ -218,4 +235,18 @@ body {
 }
 .star-btn:hover { border-color: #f59e0b; color: #f59e0b; }
 .star-btn.active { background: #451a03; border-color: #f59e0b; color: #fbbf24; }
+
+.sort-btn {
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  color: #94a3b8;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 7px 14px;
+  white-space: nowrap;
+  transition: all 0.15s;
+  font-family: 'Fira Code', monospace;
+}
+.sort-btn:hover { border-color: #3b82f6; color: #60a5fa; }
 </style>
